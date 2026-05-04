@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>౨ৎ Coquette Travels</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:ital,wght@0,700;1,700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --blush: #fdf0f0;
+            --rose: #e19b9b;
+            --lace: #fadadd;
+            --ink: #5e6a71;
+            --pearl: #ffffff;
+        }
+
+        body {
+            background-color: var(--blush);
+            background-image: radial-gradient(var(--lace) 0.8px, transparent 0.8px);
+            background-size: 30px 30px;
+            font-family: 'Inter', sans-serif;
+            color: var(--ink);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container { width: 100%; max-width: 650px; padding: 30px 15px; }
+
+        /* Description Section */
+        .travel-description {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            border-bottom: 1px dashed var(--rose);
+        }
+
+        .travel-description h2 {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: var(--rose);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .travel-description p {
+            font-size: 1rem;
+            line-height: 1.6;
+            font-style: italic;
+            color: var(--ink);
+        }
+
+        /* Boarding Pass Header */
+        .boarding-pass {
+            background: var(--pearl);
+            border-radius: 20px;
+            border: 2px dashed var(--rose);
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(225, 155, 155, 0.1);
+        }
+
+        .ticket-info h1 { font-family: 'Playfair Display', serif; font-style: italic; margin: 0; color: var(--rose); font-size: 1.5rem; }
+        .ticket-info p { margin: 5px 0 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Postcard Game Card */
+        .postcard {
+            background: #fff;
+            padding: 40px;
+            border-radius: 5px;
+            box-shadow: 5px 5px 0px var(--lace);
+            border: 1px solid #eee;
+            position: relative;
+            min-height: 350px;
+        }
+
+        .postcard::before {
+            content: '✉';
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2rem;
+            color: var(--lace);
+        }
+
+        .handwritten { font-family: 'Dancing Script', cursive; font-size: 1.8rem; color: #4a4a4a; margin-bottom: 30px; }
+
+        .destination-tag {
+            background: var(--blush);
+            color: var(--rose);
+            padding: 5px 15px;
+            border-radius: 50px;
+            border: 1px solid var(--lace);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Options */
+        .options-list { margin-top: 30px; }
+        .option-btn {
+            display: block;
+            width: 100%;
+            background: none;
+            border: 1px solid var(--lace);
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: 0.3s;
+            text-align: center;
+            color: var(--ink);
+        }
+
+        .option-btn:hover { background: var(--blush); border-color: var(--rose); transform: scale(1.02); }
+        .correct { background: #f0fff4 !important; border-color: #a8dadc !important; }
+        .wrong { background: #fff5f5 !important; border-color: var(--rose) !important; }
+
+        .btn-next {
+            background: var(--rose);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            width: 100%;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="travel-description">
+        <h2>Postcards from the Heart ౨ৎ</h2>
+        <p>A dreamy journey through the world's most romantic cities. Collect memories like pearls as you identify iconic landmarks and hidden gems across the globe. Grab your boarding pass and let's explore together.</p>
+    </header>
+
+    <div class="boarding-pass">
+        <div class="ticket-info">
+            <h1>Boarding Pass ౨ৎ</h1>
+            <p>Passenger: Traveler</p>
+        </div>
+        <div style="text-align: right;">
+            <p style="font-size: 1.2rem; font-weight: bold; color: var(--rose);">Gate: <span id="q-num">1</span>/10</p>
+        </div>
+    </div>
+
+    <main class="postcard">
+        <span class="destination-tag">Next Stop...</span>
+        <h2 class="handwritten" id="question-text">Which landmark will we find in Paris?</h2>
+        
+        <div id="options-container" class="options-list"></div>
+
+        <div id="feedback-panel" class="hidden">
+            <p style="font-style: italic; font-size: 0.9rem; text-align: center; color: var(--rose);">Wonderful choice! ✨</p>
+            <button class="btn-next" onclick="nextQuestion()">Continue Journey ✈</button>
+        </div>
+    </main>
+</div>
+
+<script>
+    const travelData = [
+        { city: "Paris", q: "Which landmark will we find in Paris?", o: ["Eiffel Tower", "Colosseum", "Big Ben", "Statue of Liberty"], a: 0 },
+        { city: "Tokyo", q: "Where should we go to see Mount Fuji?", o: ["Seoul", "Tokyo", "Beijing", "Bangkok"], a: 1 },
+        { city: "Rome", q: "Which city is home to the ancient Colosseum?", o: ["Madrid", "Athens", "Rome", "Paris"], a: 2 },
+        { city: "New York", q: "Where is the bright lights of Times Square?", o: ["London", "New York", "Chicago", "Toronto"], a: 1 },
+        { city: "London", q: "Which city has the famous red telephone booths?", o: ["Dublin", "Sydney", "London", "Edinburgh"], a: 2 },
+        { city: "Sydney", q: "Where is the iconic Opera House located?", o: ["Auckland", "Sydney", "Melbourne", "Perth"], a: 1 },
+        { city: "Cairo", q: "In which city can we see the Great Pyramids?", o: ["Dubai", "Cairo", "Marrakesh", "Istanbul"], a: 1 },
+        { city: "Rio", q: "Where is the Christ the Redeemer statue?", o: ["Mexico City", "Rio de Janeiro", "Lima", "Bogota"], a: 1 },
+        { city: "Agra", q: "Which city is home to the Taj Mahal?", o: ["Mumbai", "Delhi", "Agra", "Jaipur"], a: 2 },
+        { city: "Venice", q: "Which city is famous for its romantic gondolas?", o: ["Florence", "Venice", "Nice", "Barcelona"], a: 1 }
+    ];
+
+    let current = 0;
+
+    function loadQuestion() {
+        const data = travelData[current];
+        document.getElementById('q-num').innerText = current + 1;
+        document.getElementById('question-text').innerText = data.q;
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        data.o.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => {
+                document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                if(i === data.a) {
+                    btn.classList.add('correct');
+                    confetti({ particleCount: 100, spread: 70, colors: ['#fadadd', '#e19b9b'] });
+                } else {
+                    btn.classList.add('wrong');
+                    document.querySelectorAll('.option-btn')[data.a].classList.add('correct');
+                }
+                document.getElementById('feedback-panel').classList.remove('hidden');
+            };
+            container.appendChild(btn);
+        });
+        document.getElementById('feedback-panel').classList.add('hidden');
+    }
+
+    function nextQuestion() {
+        current++;
+        if(current < travelData.length) {
+            loadQuestion();
+        } else {
+            document.querySelector('.postcard').innerHTML = `
+                <h2 class="handwritten">Safe Travels! ౨ৎ</h2>
+                <p style="text-align: center;">You've completed your world tour.</p>
+                <button class="btn-next" onclick="location.reload()">Travel Again ✈</button>
+            `;
+        }
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>
